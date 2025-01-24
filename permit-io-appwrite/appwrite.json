@@ -1,0 +1,31 @@
+{
+    "projectId": "677c6d970016b1973c68",
+    "functions": [
+        {
+            "$id": "6781cd6c003e12e58e21",
+            "execute": [
+                "any"
+            ],
+            "name": "sync-user-with-permit",
+            "enabled": true,
+            "logging": true,
+            "runtime": "node-18.0",
+            "scopes": [
+                "users.read",
+                "users.write",
+                "functions.read",
+                "functions.write",
+                "execution.read",
+                "execution.write"
+            ],
+            "events": [
+                "users.*.create"
+            ],
+            "schedule": "",
+            "timeout": 15,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "path": "functions/sync-user-with-permit"
+        }
+    ]
+}
