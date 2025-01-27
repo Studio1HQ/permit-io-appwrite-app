@@ -57,7 +57,11 @@ export async function syncUsersWithPermit(email: string, name: string) {
   }
 }
 
-export async function createResource(resource: string, key: string, userKey: string) {
+export async function createResource(
+  resource: string,
+  key: string,
+  userKey: string
+) {
   try {
     const response = await fetch(`${baseUrl}/create-resource`, {
       method: "POST",
@@ -67,7 +71,7 @@ export async function createResource(resource: string, key: string, userKey: str
       body: JSON.stringify({
         resource,
         key,
-        userKey
+        userKey,
       }),
     });
 
@@ -133,5 +137,31 @@ export async function updateSharedUserRole(
     console.log(error);
     if (error instanceof Error) return error.message;
     return `An error occurred when updating the shared user's role`;
+  }
+}
+
+export async function checkUserPermission(
+  userKey: string,
+  fileId: string,
+  action: string
+) {
+  try {
+    const response = await fetch(`${baseUrl}/check-user-permission`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userKey, fileId, action }),
+    });
+
+    if (!response.ok)
+      throw new Error("An error occurred while checking user's permission");
+
+    const data = await response.json();
+    console.log(data);
+    return data; // {permitted: true}
+  } catch (error) {
+    if (error instanceof Error) return error.message;
+    return `An error occurred: ${error}`;
   }
 }

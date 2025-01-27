@@ -3,7 +3,7 @@ import FileList from "../components/FileList";
 import { useAuth } from "../context/context";
 import {
   database,
-  fetchFilesWithUserRole,
+  fetchFilesWithUserPermission,
   storage,
 } from "../configurations/appwrite";
 import { ID } from "appwrite";
@@ -26,7 +26,7 @@ function FileUploadPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const FilesWithRoles = await fetchFilesWithUserRole(
+        const FilesWithRoles = await fetchFilesWithUserPermission(
           user.$id,
           user.email
         );
@@ -102,8 +102,6 @@ function FileUploadPage() {
     }
   }
 
-  console.log(userFiles);
-
   return (
     <div className="py-8 px-8 flex flex-col gap-1 items-center">
       <h1 className="text-2xl font-bold my-4">Welcome, {user.name}</h1>
@@ -154,7 +152,7 @@ function FileUploadPage() {
             <div className="my-8 flex gap-4 flex-wrap" key={file.fileId}>
               <FileList
                 fileName={file?.fileName}
-                isOwner={file.role.role?.includes("owner")}
+                isOwner={file.canShare}
                 fileId={file.fileId}
               />
             </div>

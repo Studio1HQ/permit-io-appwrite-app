@@ -1,5 +1,5 @@
 import { Client, Account, Databases, Storage, Query, Models } from "appwrite";
-import { getUserRole } from "./permit-io";
+import { checkUserPermission, getUserRole } from "./permit-io";
 
 // import { Navigate } from "react-router-dom";
 
@@ -81,7 +81,7 @@ export const fetchFilesWithUrl = async (files: Document[]) => {
 };
 
 // fetch files with user roles
-export async function fetchFilesWithUserRole(
+export async function fetchFilesWithUserPermission(
   userId: string,
   userEmail: string
 ) {
@@ -97,10 +97,13 @@ export async function fetchFilesWithUserRole(
   const processFiles = async (files: Document[]) => {
     return Promise.all(
       files.map(async (file) => {
-        const role = await getUserRole(userEmail, file.fileId);
+        // const role = await getUserRole(userEmail, file.fileId);
+        const permission = await checkUserPermission(userEmail, file.fileId, "share");
+        
+        console.log(`Permission for ${file.fileName}: ${permission.permitted}`);
         return {
           ...file,
-          role,
+          canShare: permission.permitted,
         };
       })
     );
