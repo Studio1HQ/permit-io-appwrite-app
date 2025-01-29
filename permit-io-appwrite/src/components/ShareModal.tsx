@@ -1,6 +1,6 @@
 import React, { RefObject, useState } from "react";
 import { shareFile } from "../actions/actions";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 interface ShareModalProps {
   dialogRef: RefObject<HTMLDialogElement>;
@@ -28,8 +28,9 @@ function ShareModal({ fileId, closeDialog, dialogRef }: ShareModalProps) {
       closeDialog();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to share file.");
+      if (error instanceof Error) toast.error(`${error.message}`);
       closeDialog();
+      return;
     }
   }
   // console.log(role, email);
@@ -73,6 +74,7 @@ function ShareModal({ fileId, closeDialog, dialogRef }: ShareModalProps) {
           <button onClick={closeDialog} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancel</button>
         </div>
       </form>
+      <ToastContainer />
     </dialog>
   );
 }

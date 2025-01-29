@@ -113,7 +113,8 @@ export async function getUserRole(userKey: string, fileId: string) {
 export async function updateSharedUserRole(
   userKey: string,
   role: string,
-  fileId: string
+  fileId: string,
+  requesterEmail: string
 ) {
   try {
     const res = await fetch(`${baseUrl}/update-user-role`, {
@@ -125,17 +126,20 @@ export async function updateSharedUserRole(
         userKey,
         role,
         fileId,
+        requesterEmail,
       }),
     });
 
-    if (!res.ok) throw new Error("An error occurred while updating user role");
+    if (!res.ok) throw new Error(`An error occurred while updating user role: ${res.statusText}`);
 
     const data = await res.json();
     console.log(res, data);
     return data;
   } catch (error) {
-    console.log(error);
-    if (error instanceof Error) return error.message;
+    if (error instanceof Error) {
+      console.log(error.message);
+      return error.message;
+    };
     return `An error occurred when updating the shared user's role`;
   }
 }

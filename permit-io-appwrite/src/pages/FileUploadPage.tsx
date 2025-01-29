@@ -102,6 +102,8 @@ function FileUploadPage() {
     }
   }
 
+  console.log(user.$id);
+
   return (
     <div className="py-8 px-8 flex flex-col gap-1 items-center">
       <h1 className="text-2xl font-bold my-4">Welcome, {user.name}</h1>
@@ -145,11 +147,13 @@ function FileUploadPage() {
 
       {loading ? (
         <p>Loading...</p>
+      ) : userFiles.length === 0 ? (
+        <p>No files found</p>
       ) : (
-        userFiles.map((file) => {
-          console.log(file);
+        userFiles.map((file, index) => {
+          console.log(file.ownerId, user.$id);
           return (
-            <div className="my-8 flex gap-4 flex-wrap" key={file.fileId}>
+            <div className="my-8 flex gap-4 flex-wrap" key={index}>
               <FileList
                 fileName={file?.fileName}
                 isOwner={file.canShare}
