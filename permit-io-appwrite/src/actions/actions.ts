@@ -17,14 +17,23 @@ export async function shareFile(
     console.log(user.$id, userEmail, currentDoc.ownerId);
     
     if(!user) throw new Error("Unauthorized: User not found");
-    
-    // if(currentDoc.ownerId !== user.$id) throw new Error("Unauthorized: Only the owner can share the file");
 
-    // if(currentDoc.shared_with.includes(userEmail)) throw new Error("User already has access to this file");
+    if(currentDoc.shared_with.includes(userEmail)) throw new Error("Error: User already has access to this file");
 
-    if(currentDoc.ownerId === user.$id && userEmail === user.email) return
+    if(currentDoc.ownerId === user.$id && userEmail === user.email) throw new Error("Error: You can't share a file with yourself");
 
-    if(currentDoc.shared_with.includes(userEmail)) return
+    const updateRoleResult = await updateSharedUserRole(
+      userEmail,
+      role,
+      fileId,
+      user.email
+    );
+
+    if (updateRoleResult?.status === 403 && updateRoleResult?.message === "You don't have permission to update user role") {
+      throw new Error("Unauthorized: You don't have permission to update user role");
+    }
+
+    if (updateRoleResult?.status === 403) throw new Error("An unknown error occurred");
 
     const result = await database.updateDocument(
       import.meta.env.VITE_DATABASE_ID,
@@ -34,20 +43,22 @@ export async function shareFile(
         shared_with: [...currentDoc.shared_with, userEmail],
       }
     );
-    const updateRoleResult = await updateSharedUserRole(
-      userEmail,
-      role,
-      fileId,
-      user.email
-    );
     console.log(result, updateRoleResult);
-    return updateRoleResult;
+    return {
+      success: true,
+      message: updateRoleResult?.message,
+    };
   } catch (error) {
-    // console.error(error);
     if (error instanceof Error) {
       console.error(error.message);
-      return error.message
+      return {
+        success: false,
+        message: error.message,
+      }
     };
-    return "An error occurred";
+    return {
+      success: false,
+      message: "An error unknown occurred while sharing the file",
+    };
   }
 }

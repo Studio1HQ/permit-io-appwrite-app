@@ -130,10 +130,13 @@ export async function updateSharedUserRole(
       }),
     });
 
-    if (!res.ok) throw new Error(`An error occurred while updating user role: ${res.statusText}`);
+    if (!res.ok) {
+      // throw Error(`An error occurred while updating the shared user's role`);
+      return res.json().then(data => data);
+    };
 
     const data = await res.json();
-    console.log(res, data);
+    console.log(data.message);
     return data;
   } catch (error) {
     if (error instanceof Error) {

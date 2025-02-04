@@ -156,7 +156,6 @@ function FileUploadPage() {
             <div className="my-8 flex gap-4 flex-wrap" key={index}>
               <FileList
                 fileName={file?.fileName}
-                isOwner={file.canShare}
                 fileId={file.fileId}
               />
             </div>

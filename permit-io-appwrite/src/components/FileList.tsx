@@ -5,13 +5,15 @@ import { storage } from "../configurations/appwrite";
 
 interface FileListProps {
   fileName: string;
-  isOwner: boolean;
+  isOwner?: boolean;
   fileId: string;
 }
 
-function FileList({ fileName, isOwner, fileId }: FileListProps) {
+function FileList({ fileName, fileId }: FileListProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [fileID, setFileID] = useState(fileId);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleShareFile = () => {
     setFileID(fileId);
@@ -38,25 +40,30 @@ function FileList({ fileName, isOwner, fileId }: FileListProps) {
       <FileText size={100} />
       <h3 className="font-semibold text-base text-wrap">{fileName}</h3>
       <div className="flex gap-3">
-        {isOwner && (
-          <button
-            className="inline-flex gap-2 items-center border border-slate-400 px-2 py-1 rounded hover:text-slate-400 transition duration-75"
-            onClick={handleShareFile}
-          >
-            Share
-            <Share2 className="inline-block" size={20} />
-          </button>
-        )}
-        <button onClick={handleDownloadFile} className="inline-flex gap-2 items-center px-2 py-1 rounded bg-green-500 text-white hover:bg-green-300 transition duration-75">
+        <button
+          className="inline-flex gap-2 items-center border border-slate-400 px-2 py-1 rounded hover:text-slate-400 transition duration-75"
+          onClick={handleShareFile}
+        >
+          Share
+          <Share2 className="inline-block" size={20} />
+        </button>
+        <button
+          onClick={handleDownloadFile}
+          className="inline-flex gap-2 items-center px-2 py-1 rounded bg-green-500 text-white hover:bg-green-300 transition duration-75"
+        >
           Download
           <Download className="inline-block" size={20} />
         </button>
       </div>
 
+      {error ? <p className="text-red-500">{error}</p> : success ? <p className="text-green-500">{success}</p> : ""}
+
       <ShareModal
         fileId={fileID}
         dialogRef={dialogRef}
         closeDialog={closeDialog}
+        setError={setError}
+        setSuccess={setSuccess}
       />
     </div>
   );

@@ -1,14 +1,21 @@
 import React, { RefObject, useState } from "react";
 import { shareFile } from "../actions/actions";
-import { toast, ToastContainer } from "react-toastify";
 
 interface ShareModalProps {
   dialogRef: RefObject<HTMLDialogElement>;
   fileId: string;
   closeDialog: () => void;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  setSuccess: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-function ShareModal({ fileId, closeDialog, dialogRef }: ShareModalProps) {
+function ShareModal({
+  fileId,
+  closeDialog,
+  dialogRef,
+  setError,
+  setSuccess,
+}: ShareModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("viewer");
 
@@ -22,15 +29,19 @@ function ShareModal({ fileId, closeDialog, dialogRef }: ShareModalProps) {
   async function handleFileShare(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (email === "") return;
+
     try {
-      await shareFile(fileId, email, role);
-      toast.success(`File shared succesfully with ${email}`);
+      const res = await shareFile(fileId, email, role);
+      if (!res.success) throw new Error(res.message);
+      setSuccess(res.message);
       closeDialog();
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) toast.error(`${error.message}`);
+      if (error instanceof Error) setError(error.message);
       closeDialog();
-      return;
+    } finally {
+      setEmail("");
+      setRole("viewer");
     }
   }
   // console.log(role, email);
@@ -45,7 +56,10 @@ function ShareModal({ fileId, closeDialog, dialogRef }: ShareModalProps) {
           X
         </button>
       </div>
-      <form onSubmit={handleFileShare} className="px-8 py-4 flex flex-col gap-4 justify-center">
+      <form
+        onSubmit={handleFileShare}
+        className="px-8 py-4 flex flex-col gap-4 justify-center"
+      >
         <div>
           <label htmlFor="email">Email:</label>
           <input
@@ -70,11 +84,20 @@ function ShareModal({ fileId, closeDialog, dialogRef }: ShareModalProps) {
           </select>
         </div>
         <div className="flex gap-8">
-          <button type="submit" className="bg-gray-200 hover:bg-gray-400 transition text-black font-bold py-2 px-4 rounded">Share</button>
-          <button onClick={closeDialog} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancel</button>
+          <button
+            type="submit"
+            className="bg-gray-200 hover:bg-gray-400 transition text-black font-bold py-2 px-4 rounded"
+          >
+            Share
+          </button>
+          <button
+            onClick={closeDialog}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Cancel
+          </button>
         </div>
       </form>
-      <ToastContainer />
     </dialog>
   );
 }
