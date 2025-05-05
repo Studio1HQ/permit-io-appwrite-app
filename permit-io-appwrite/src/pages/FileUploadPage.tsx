@@ -7,19 +7,32 @@ import {
   storage,
 } from "../configurations/appwrite";
 import { ID } from "appwrite";
-import { createResource } from "../configurations/permit-io";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 function FileUploadPage() {
   const { user } = useAuth();
-
+  
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<
     "initial" | "uploading" | "success" | "fail"
   >("initial");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [userFiles, setUserFiles] = useState([]);
+  const [userFiles, setUserFiles] = useState<
+    {
+      canShare: boolean | undefined;
+      ownerId: string;
+      fileId: string;
+      fileName: string;
+      shared_with: string[];
+      $id: string;
+      $collectionId: string;
+      $databaseId: string;
+      $createdAt: string;
+      $updatedAt: string;
+      $permissions: string[];
+    }[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -27,8 +40,8 @@ function FileUploadPage() {
       setLoading(true);
       try {
         const FilesWithRoles = await fetchFilesWithUserPermission(
-          user.$id,
-          user.email
+          user?.$id,
+          user?.email
         );
         setUserFiles(FilesWithRoles);
       } catch (error) {
@@ -78,21 +91,14 @@ function FileUploadPage() {
             shared_with: [],
           }
         );
-
-        // create resource instance in Permt
-        const createdResource = await createResource(
-          "file",
-          fileId,
-          user.email
-        );
-
-        console.log(fileMetadata, createdResource);
-        toast.success(createdResource);
+        console.log(fileMetadata);
+        toast.success("File uploaded successfully");
         setStatus("success");
         setIsLoading(false);
       } catch (error) {
         console.log(error);
         if (error instanceof Error) toast.error(error.message);
+        toast.error("Failed to upload file due to unknown error");
         setStatus("fail");
       } finally {
         setIsLoading(false);
@@ -106,6 +112,7 @@ function FileUploadPage() {
 
   return (
     <div className="py-8 px-8 flex flex-col gap-1 items-center">
+      <ToastContainer />
       <h1 className="text-2xl font-bold my-4">Welcome, {user.name}</h1>
       <p className="text-base font-semibold my-3">
         Upload, view, and share files with your friends
@@ -135,7 +142,7 @@ function FileUploadPage() {
         <button
           onClick={handleUpload}
           className="bg-blue-500 px-3 py-2 font-semibold cursor-pointer text-white rounded-md hover:bg-blue-300 transition-all"
-          disabled={isLoading}
+          aria-disabled={isLoading ? true : false}
         >
           Upload file
         </button>
@@ -154,10 +161,7 @@ function FileUploadPage() {
           console.log(file.ownerId, user.$id);
           return (
             <div className="my-8 flex gap-4 flex-wrap" key={index}>
-              <FileList
-                fileName={file?.fileName}
-                fileId={file.fileId}
-              />
+              <FileList fileName={file?.fileName} fileId={file.fileId} />
             </div>
           );
         })

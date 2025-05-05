@@ -2,30 +2,32 @@
     "projectId": "677c6d970016b1973c68",
     "functions": [
         {
-            "$id": "6781cd6c003e12e58e21",
+            "$id": "67cef8a6001f00f4bce0",
+            "name": "sync-with-permit",
+            "runtime": "node-18.0",
+            "cpu": 1,
+            "memory": 512,
             "execute": [
                 "any"
             ],
-            "name": "sync-user-with-permit",
-            "enabled": true,
-            "logging": true,
-            "runtime": "node-18.0",
+            "events": [
+                "users.*.create",
+                "buckets.*.files.*.create"
+            ],
             "scopes": [
                 "users.read",
-                "users.write",
-                "functions.read",
-                "functions.write",
-                "execution.read",
-                "execution.write"
-            ],
-            "events": [
-                "users.*.create"
+                "files.read",
+                "files.write",
+                "buckets.read",
+                "buckets.write"
             ],
             "schedule": "",
             "timeout": 15,
+            "enabled": true,
+            "logging": true,
             "entrypoint": "src/main.js",
             "commands": "npm install",
-            "path": "functions/sync-user-with-permit"
+            "path": "functions/sync-with-permit"
         }
     ]
 }

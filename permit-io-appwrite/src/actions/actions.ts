@@ -1,5 +1,6 @@
-import { account, database, Document } from "../configurations/appwrite";
-import { updateSharedUserRole } from "../configurations/permit-io";
+import { account, database, Document, FunctionPromiseReturnType } from "../configurations/appwrite";
+// import { updateSharedUserRole } from "../configurations/permit-io";
+import { functions } from "../configurations/appwrite";
 
 export async function shareFile(
   fileId: string,
@@ -22,18 +23,28 @@ export async function shareFile(
 
     if(currentDoc.ownerId === user.$id && userEmail === user.email) throw new Error("Error: You can't share a file with yourself");
 
-    const updateRoleResult = await updateSharedUserRole(
-      userEmail,
+    // const updateRoleResult = await updateSharedUserRole(
+    //   userEmail,
+    //   role,
+    //   fileId,
+    //   user.email
+    // );
+
+    const data = {
+      sharedUserKey: userEmail,
       role,
       fileId,
-      user.email
-    );
+      requesterEmail: user?.email,
+      endpoint: "update-user-role"
+    }
 
-    if (updateRoleResult?.status === 403 && updateRoleResult?.message === "You don't have permission to update user role") {
+    const updateRoleResult: FunctionPromiseReturnType = await functions.createExecution(import.meta.env.VITE_FUNCTION_ID, JSON.stringify(data));
+
+    if (updateRoleResult?.ok === false && updateRoleResult?.message === "You don't have permission to share this file") {
       throw new Error("Unauthorized: You don't have permission to update user role");
     }
 
-    if (updateRoleResult?.status === 403) throw new Error("An unknown error occurred");
+    if (updateRoleResult?.ok === false) throw new Error("An unknown error occurred");
 
     const result = await database.updateDocument(
       import.meta.env.VITE_DATABASE_ID,

@@ -12,8 +12,8 @@ interface FileListProps {
 function FileList({ fileName, fileId }: FileListProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [fileID, setFileID] = useState(fileId);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
+  // const [success, setSuccess] = useState<string | null | undefined>(null);
 
   const handleShareFile = () => {
     setFileID(fileId);
@@ -56,14 +56,14 @@ function FileList({ fileName, fileId }: FileListProps) {
         </button>
       </div>
 
-      {error ? <p className="text-red-500">{error}</p> : success ? <p className="text-green-500">{success}</p> : ""}
+      {/* {error ? <p className="text-red-500">{error}</p> : success ? <p className="text-green-500">{success}</p> : ""} */}
 
       <ShareModal
         fileId={fileID}
         dialogRef={dialogRef}
         closeDialog={closeDialog}
-        setError={setError}
-        setSuccess={setSuccess}
+        // setError={setError}
+        // setSuccess={setSuccess}
       />
     </div>
   );

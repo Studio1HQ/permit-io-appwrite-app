@@ -1,7 +1,14 @@
-import { Client, Account, Databases, Storage, Query, Models } from "appwrite";
-import { checkUserPermission, getUserRole } from "./permit-io";
+import { Client, Account, Databases, Storage, Query, Models, Functions } from "appwrite";
+// import { checkUserPermission, getUserRole } from "./permit-io";
 
 // import { Navigate } from "react-router-dom";
+
+export interface FunctionPromiseReturnType extends Models.Execution {
+  ok?: boolean;
+  message?: string;
+  role?: string | string[];
+  permitted?: boolean;
+}
 
 export interface Document extends Models.Document {
   ownerId: string;
@@ -19,6 +26,8 @@ export const account = new Account(client);
 export const database = new Databases(client);
 
 export const storage = new Storage(client);
+
+export const functions = new Functions(client);
 
 // fetch file metadata for both owned and shared files
 
@@ -98,12 +107,23 @@ export async function fetchFilesWithUserPermission(
     return Promise.all(
       files.map(async (file) => {
         // const role = await getUserRole(userEmail, file.fileId);
-        const permission = await checkUserPermission(userEmail, file.fileId, "share");
+        // const permission = await checkUserPermission(userEmail, file.fileId, "share");
+
+        const body = {
+          endpoint: "check-user-permission",
+          userKey: userEmail,
+          fileId: file.fileId,
+          action: "share"
+        }
+
+        const execution = await functions.createExecution(import.meta.env.VITE_FUNCTION_ID, JSON.stringify(body));
+        const parsedExecution = JSON.parse(execution.responseBody);
         
-        console.log(`Permission for ${file.fileName}: ${permission.permitted}`);
+        // console.log(`Permission for ${file.fileName}: ${permission.permitted}`);
+        console.log(`Permission for ${file.fileName}: ${parsedExecution?.permitted}`, parsedExecution);
         return {
           ...file,
-          canShare: permission.permitted,
+          canShare: parsedExecution?.permitted,
         };
       })
     );

@@ -1,20 +1,21 @@
 import React, { RefObject, useState } from "react";
 import { shareFile } from "../actions/actions";
+import { toast } from "react-toastify";
 
 interface ShareModalProps {
   dialogRef: RefObject<HTMLDialogElement>;
   fileId: string;
   closeDialog: () => void;
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
-  setSuccess: React.Dispatch<React.SetStateAction<string | null>>;
+  setError?: React.Dispatch<React.SetStateAction<string | null>>;
+  setSuccess?: React.Dispatch<React.SetStateAction<string | null | undefined>>;
 }
 
 function ShareModal({
   fileId,
   closeDialog,
   dialogRef,
-  setError,
-  setSuccess,
+  // setError,
+  // setSuccess,
 }: ShareModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("viewer");
@@ -33,11 +34,15 @@ function ShareModal({
     try {
       const res = await shareFile(fileId, email, role);
       if (!res.success) throw new Error(res.message);
-      setSuccess(res.message);
+      toast.success(`File shared successfully with ${email}`);
+      // setSuccess(res.message);
       closeDialog();
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) setError(error.message);
+      if (error instanceof Error) {
+        toast.error(error.message);
+        // setError(error.message);
+      };
       closeDialog();
     } finally {
       setEmail("");
